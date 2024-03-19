@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// _____USER TABLE_____
+model User {
+  userId Int @unique 
+  userName String @unique
+  password String
+  fullName String
+  email String?
+  home String? 
+  phone String?
+  gender String?
+  dob DateTime?
+  bankAccount String? 
+
+  status String?
+  createdAt DateTime?  @default(now())
+  updatedAt DateTime? @updatedAt
+  type String @default("Customer")
+  
+  // relation
+  userShop Shop[] 
+  artical Article[]
+  order Order[]
+  rate Rating_Shop[]
+
+  //primary key
+  @@id([userId])
+
+}
+
+// _____PRODUCT TABLE_____
+model Product {
+  shopId Int
+  productId Int @unique
+  productName String 
+  image String
+  quantity Int @default(0)
+  price Float @default(0)
+  description String
+
+  status String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relation
+  shop Shop @relation(fields: [shopId],references: [shopId])
+  orderDetail Order_Detail[]
+
+  // primary key
+  @@id([productId])
+}
+
+// _____SHOP TABLE_____
+model Shop {
+  userId Int
+  shopId Int @unique
+  shopName String
+
+  status String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relation
+  user User @relation(fields: [userId],references: [userId])
+  rate Rating_Shop[]
+  product Product[]
+  order Order[]
+
+  // primary key
+  @@id([shopId])
+}
+
+// _____RATING SHOP TABLE_____
+model Rating_Shop {
+  shopId Int 
+  userId Int
+  rate Int
+
+  // relation
+  shop Shop @relation(fields: [shopId], references: [shopId])
+  user User @relation(fields: [userId], references: [userId])
+
+  // primary key
+  @@id([shopId, userId])
+}
+
+// _____ARTICLE TABLE_____  
+model Article {
+  userId Int
+  articleId Int @unique
+  title String 
+  content String
+
+  status String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relation
+  user User @relation(fields: [userId],references: [userId])
+
+  // primary key
+  @@id([articleId])
+}
+
+// _____ORDER TABLE_____
+model Order {
+  orderId Int @unique
+  userId Int 
+  shopId Int
+  paymentMethod String 
+
+  status String
+  createdAt DateTime  @default(now())
+  
+  // relation
+  user User @relation(fields: [userId], references: [userId])
+  shop Shop @relation(fields: [shopId], references: [shopId])
+  orderDetail Order_Detail[]
+
+  // primary key
+  @@id([orderId])
+}
+
+// _____ORDER DETIAL TABLE_____
+model Order_Detail {
+  orderId Int
+  productId Int
+  quantity Int @default(0)
+  price Float @default(0)
+  
+  createdAt DateTime  @default(now())
+
+  // relation
+  order Order @relation(fields: [orderId], references: [orderId])
+  product Product @relation(fields: [productId], references: [productId])
+
+  //primary key
+  @@id([orderId, productId])
+}
